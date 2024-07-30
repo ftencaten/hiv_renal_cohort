@@ -1,0 +1,51 @@
+---
+title: "Exploratory data analysis"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r Load libraries}
+library(tidyverse)
+```
+
+```{r Load files}
+df <- read_csv('data/raw/20240720_CIENI_CDK_cohorts_merged.csv', 
+               na = c('Unknown', 'NA', "?", "??")) 
+```
+
+```{r}
+parameters <- c("Cohort","Sample ID", "Group",
+                "Age (years)", "Sex", "IMC", 'HIV status', "ART scheme", 
+                "Months on ART", "Diabetes Mellitus", "Dyslipidemia", "Hypertension", 
+                "Hemoglobin", "Glucosilated hemoglobin (HbA1c)", "Glucose", "Urea",
+                "BUN", "Uric acid", "Seric creatinin", "Total cholesterol",
+                "Triglicerids", "HDL", "LDL", "VLDL", "índice Aterogénico",
+                "Microalbumin in urine", "Relación MALB/Cr Orina",
+                "Urinary creatinine", "Albumin", "BT", "BD", "BI", "TGO", "TGP",
+                "CPK", "D dimer", "C reactive protein", "GFR_Creatinine",
+                "Cystatine", "GFR_cystatine", "GFR_CR/CYST")
+
+aging.cohort <- df |> 
+  filter(Cohort == 'Aging', !is.na(`Age (years)`)) |> 
+  purrr::discard(~sum(is.na(.x))/length(.x)* 100 >= 33) |> 
+  select(all_of(parameters)) |> 
+  mutate(Sex = case_when(Sex == 1 ~ 'M',
+                         Sex == 2 ~ 'F',
+                         TRUE ~ Sex),
+         Glucose = as.double(Glucose), 
+         IMC = as.double(IMC),
+         `Age (years)` = as.double(`Age (years)`),
+         `Uric acid` = as.double(`Uric acid`),
+         `Seric creatinin` = as.double(`Seric creatinin`),
+         `Total cholesterol` = as.double(`Total cholesterol`),
+         Triglicerids = as.double(Triglicerids),
+         HDL = as.double(HDL), LDL = as.double(LDL),
+         GFR_Creatinine = as.double(GFR_Creatinine), 
+         Cystatine = as.double(Cystatine),
+         GFR_cystatine = as.double(GFR_cystatine),
+         `GFR_CR/CYST` = as.double(`GFR_CR/CYST`),
+         `D dimer` = as.double(sub('<', '', `D dimer`)),
+         `C reactive protein` = as.double(sub('<', '', `C reactive protein`)))
+
+```
+
